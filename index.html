@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MONOFORM | Architecture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;700&family=Playfair+Display:wght@600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+    <header class="site-header">
+      <a class="brand" href="#hero">MONOFORM</a>
+      <nav>
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#model-lab">3D Lab</a>
+        <a href="#testimonials">Testimonials</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        Light Luxe
+      </button>
+    </header>
+
+    <main>
+      <section id="hero" class="panel hero">
+        <p class="eyebrow">Contemporary Architecture Studio</p>
+        <h1>ARCHITECTURE THAT COMMANDS THE CITYLINE</h1>
+        <p>
+          Scroll to construct a real landmark in monochrome and explore spaces shaped by precision,
+          rhythm, and light.
+        </p>
+        <p class="credit">
+          Background model: Carnegie Mansion Exterior (CC0), Cooper Hewitt / Smithsonian.
+        </p>
+      </section>
+
+      <section id="about" class="panel about">
+        <p class="eyebrow">About</p>
+        <h2>Clarity in form. Boldness in proportion.</h2>
+        <p>
+          MONOFORM is an international architecture firm crafting civic, residential, and cultural
+          projects. We combine computational geometry and human-scale detailing to create places with
+          lasting emotional impact.
+        </p>
+        <div class="stats">
+          <article>
+            <span>24</span>
+            <p>Countries</p>
+          </article>
+          <article>
+            <span>180+</span>
+            <p>Projects Delivered</p>
+          </article>
+          <article>
+            <span>32</span>
+            <p>Design Awards</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="projects" class="panel projects">
+        <p class="eyebrow">Selected Work</p>
+        <h2>Architecture in motion</h2>
+        <div class="project-grid">
+          <article>
+            <h3>Northline Residence</h3>
+            <p>Timber, steel, and negative space composed around natural daylight.</p>
+          </article>
+          <article>
+            <h3>Axis Museum</h3>
+            <p>A black basalt shell with a white concrete interior promenade.</p>
+          </article>
+          <article>
+            <h3>Harbor Forum</h3>
+            <p>Public atrium and suspended galleries wrapped in perforated metal.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="model-lab" class="panel model-lab">
+        <p class="eyebrow">Interactive 3D Projects</p>
+        <h2>Drag. Rotate. Explore Real Buildings.</h2>
+        <p>
+          Use mouse drag on desktop or finger drag on phone to rotate each real-world project. On
+          compatible models, tap annotations to jump through spaces and room areas.
+        </p>
+
+        <div class="model-grid">
+          <article class="model-card">
+            <h3>Carnegie Mansion</h3>
+            <p>The same real house used in the animated background, from Cooper Hewitt / Smithsonian.</p>
+            <div class="embed-wrap" data-model-src="https://sketchfab.com/models/3b94e64152cd49379477c4c7de5c8ada/embed?ui_hint=1&ui_infos=1&ui_controls=1&ui_annotations=1&autostart=1">
+              <iframe
+                title="Carnegie Mansion Main, 2nd and 3rd Floors"
+                src="https://sketchfab.com/models/3b94e64152cd49379477c4c7de5c8ada/embed?ui_hint=1&ui_infos=1&ui_controls=1&ui_annotations=1&autostart=0"
+                loading="lazy"
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+                allowfullscreen
+              ></iframe>
+              <button type="button" class="open-model">Open Fullscreen</button>
+            </div>
+            <div class="floor-links">
+              <a href="https://sketchfab.com/3d-models/cooper-hewitt-main-floor-bbcd636543f74d2790267f79a9aa0a96" target="_blank" rel="noopener noreferrer">Main Floor</a>
+              <a href="https://sketchfab.com/3d-models/cooper-hewitt-main-2nd-3rd-floors-3b94e64152cd49379477c4c7de5c8ada" target="_blank" rel="noopener noreferrer">Full Floors</a>
+              <a href="https://sketchfab.com/3d-models/cooper-hewitt-3rd-floor-e011c170406b49b49483f85806e5ea15" target="_blank" rel="noopener noreferrer">3rd Floor</a>
+            </div>
+          </article>
+
+          <article class="model-card">
+            <h3>Affirmation Tower</h3>
+            <p>Free CC BY skyscraper model (NYC proposal) for high-rise architectural exploration.</p>
+            <div class="embed-wrap" data-model-src="https://sketchfab.com/models/f411a89dec8743bb89171e2fc4e63d9f/embed?ui_hint=1&ui_infos=1&ui_controls=1&autostart=1">
+              <iframe
+                title="Affirmation Tower Skyscraper"
+                src="https://sketchfab.com/models/f411a89dec8743bb89171e2fc4e63d9f/embed?ui_hint=1&ui_infos=1&ui_controls=1&autostart=0"
+                loading="lazy"
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+                allowfullscreen
+              ></iframe>
+              <button type="button" class="open-model">Open Fullscreen</button>
+            </div>
+            <div class="floor-links">
+              <a href="https://sketchfab.com/3d-models/affirmation-tower-f411a89dec8743bb89171e2fc4e63d9f" target="_blank" rel="noopener noreferrer">Project Page</a>
+              <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY</a>
+              <a href="https://www.adjaye.com/work/affirmation-tower/" target="_blank" rel="noopener noreferrer">Design Reference</a>
+            </div>
+          </article>
+
+          <article class="model-card">
+            <h3>Modern Cozy Interior</h3>
+            <p>Free CC BY interior design scene for room-level composition and material studies.</p>
+            <div class="embed-wrap" data-model-src="https://sketchfab.com/models/98ddc856813e4cbc8266f325f5429cf9/embed?ui_hint=1&ui_infos=1&ui_controls=1&autostart=1">
+              <iframe
+                title="Modern Cozy Interior Living Room"
+                src="https://sketchfab.com/models/98ddc856813e4cbc8266f325f5429cf9/embed?ui_hint=1&ui_infos=1&ui_controls=1&autostart=0"
+                loading="lazy"
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+                allowfullscreen
+              ></iframe>
+              <button type="button" class="open-model">Open Fullscreen</button>
+            </div>
+            <div class="floor-links">
+              <a href="https://sketchfab.com/3d-models/modern-cozy-interior-living-room-scene-asset-98ddc856813e4cbc8266f325f5429cf9" target="_blank" rel="noopener noreferrer">Project Page</a>
+              <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY</a>
+              <a href="https://sketchfab.com/ARTEL_3Dpro" target="_blank" rel="noopener noreferrer">Author Profile</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="testimonials" class="panel testimonials">
+        <p class="eyebrow">Testimonials</p>
+        <h2>Trusted by clients who build for decades</h2>
+        <div class="quotes">
+          <blockquote>
+            “Their process translated complex constraints into a timeless structure.”
+            <cite>— A. Rivera, Private Client</cite>
+          </blockquote>
+          <blockquote>
+            “The final building feels both radical and perfectly inevitable.”
+            <cite>— K. Olsen, Cultural Foundation</cite>
+          </blockquote>
+        </div>
+      </section>
+
+      <section id="contact" class="panel contact">
+        <p class="eyebrow">Contact Us</p>
+        <h2>Let’s shape your next landmark</h2>
+        <form class="contact-form" action="#" method="post">
+          <label>
+            Name
+            <input type="text" name="name" placeholder="Your name" required />
+          </label>
+          <label>
+            Email
+            <input type="email" name="email" placeholder="you@email.com" required />
+          </label>
+          <label>
+            Project Brief
+            <textarea name="message" rows="4" placeholder="Tell us about your project" required></textarea>
+          </label>
+          <button type="submit">Send Inquiry</button>
+        </form>
+      </section>
+    </main>
+
+    <div class="model-modal" id="model-modal" aria-hidden="true">
+      <div class="model-modal__backdrop" data-close-modal></div>
+      <div class="model-modal__dialog" role="dialog" aria-modal="true" aria-label="3D model fullscreen viewer">
+        <button type="button" class="model-modal__close" data-close-modal>Close</button>
+        <iframe
+          id="model-modal-frame"
+          title="Fullscreen 3D model viewer"
+          src=""
+          loading="lazy"
+          allow="autoplay; fullscreen; xr-spatial-tracking"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
