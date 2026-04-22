@@ -1,5 +1,7 @@
 # Architecture Landing Page (Three.js)
 
+Live demo: https://artenisalija.github.io/monoform-architects/
+
 A high-impact architecture firm landing page with:
 - Scroll-driven Three.js background animation
 - Real building model (Carnegie Mansion) loading via GLTF + Draco
