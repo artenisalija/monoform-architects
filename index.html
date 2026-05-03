@@ -10,6 +10,14 @@
       href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;700&family=Playfair+Display:wght@600;800&display=swap"
       rel="stylesheet"
     />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+        }
+      }
+    </script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -17,15 +25,28 @@
 
     <header class="site-header">
       <a class="brand" href="#hero">MONOFORM</a>
-      <nav>
+      <button
+        type="button"
+        class="menu-toggle"
+        id="menu-toggle"
+        aria-expanded="false"
+        aria-controls="site-nav"
+        aria-label="Open menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav id="site-nav">
         <a href="#about">About</a>
         <a href="#projects">Projects</a>
         <a href="#model-lab">3D Lab</a>
         <a href="#testimonials">Testimonials</a>
         <a href="#contact">Contact</a>
       </nav>
-      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-        Light Luxe
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to light mode">
+        <span class="theme-icon theme-icon--sun" aria-hidden="true"></span>
+        <span class="theme-icon theme-icon--moon" aria-hidden="true"></span>
       </button>
     </header>
 

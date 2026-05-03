@@ -1,18 +1,35 @@
-import * as THREE from "https://unpkg.com/three@0.162.0/build/three.module.js?module";
-import { DRACOLoader } from "https://unpkg.com/three@0.162.0/examples/jsm/loaders/DRACOLoader.js?module";
-import { GLTFLoader } from "https://unpkg.com/three@0.162.0/examples/jsm/loaders/GLTFLoader.js?module";
+import * as THREE from "three";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 const canvas = document.getElementById("bg-canvas");
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x050505, 10, 42);
+const compactViewportQuery = window.matchMedia("(max-width: 980px)");
+const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const isCompactViewport = compactViewportQuery.matches;
 
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 120);
 camera.position.set(0, 11.5, 5.6);
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.outputColorSpace = THREE.SRGBColorSpace;
+let renderer = null;
+
+try {
+  renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: !isCompactViewport,
+    alpha: true,
+    powerPreference: "high-performance",
+  });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isCompactViewport ? 1 : 1.35));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.setClearAlpha(0);
+  canvas.dataset.engine = "three.js r162";
+} catch (error) {
+  console.error("Three.js renderer startup failed:", error);
+  canvas.dataset.engine = "unavailable";
+}
 
 const ambient = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambient);
@@ -29,9 +46,15 @@ const mansionGroup = new THREE.Group();
 mansionGroup.position.set(0, -1.15, 0);
 scene.add(mansionGroup);
 
+const projectField = new THREE.Group();
+scene.add(projectField);
+
+const orbitElements = [];
 const mansionParts = [];
 const mansionEdges = [];
 let fallbackMaterial = null;
+let fallbackMesh = null;
+let loadedModelRoot = null;
 
 function smoothstep(edge0, edge1, x) {
   const t = THREE.MathUtils.clamp((x - edge0) / (edge1 - edge0), 0, 1);
@@ -54,8 +77,31 @@ function normalizeModel(model) {
 }
 
 function prepareMansion(model) {
+  if (loadedModelRoot) {
+    mansionGroup.remove(loadedModelRoot);
+    mansionParts.length = 0;
+    mansionEdges.forEach((item) => {
+      item.edge.parent?.remove(item.edge);
+      item.edge.material.dispose();
+      item.edge.geometry.dispose();
+    });
+    mansionEdges.length = 0;
+  }
+
+  if (fallbackMaterial) {
+    fallbackMaterial.dispose();
+    fallbackMaterial = null;
+  }
+
+  if (fallbackMesh) {
+    mansionGroup.remove(fallbackMesh);
+    fallbackMesh.geometry.dispose();
+    fallbackMesh = null;
+  }
+
   normalizeModel(model);
   mansionGroup.add(model);
+  loadedModelRoot = model;
 
   const centers = [];
   model.traverse((child) => {
@@ -107,16 +153,18 @@ function prepareMansion(model) {
       toneIndex,
     });
 
-    const edges = new THREE.LineSegments(
-      new THREE.EdgesGeometry(child.geometry, 26),
-      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 })
-    );
-    edges.position.copy(child.position);
-    edges.rotation.copy(child.rotation);
-    edges.scale.copy(child.scale);
-    child.parent.add(edges);
+    if (!isCompactViewport) {
+      const edges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(child.geometry, 26),
+        new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 })
+      );
+      edges.position.copy(child.position);
+      edges.rotation.copy(child.rotation);
+      edges.scale.copy(child.scale);
+      child.parent.add(edges);
 
-    mansionEdges.push({ edge: edges, phase });
+      mansionEdges.push({ edge: edges, phase });
+    }
   });
 
   applySceneTheme(document.body.classList.contains("light-theme"));
@@ -124,34 +172,38 @@ function prepareMansion(model) {
 
 function createFallbackMassing() {
   const geometry = new THREE.BoxGeometry(5.6, 3, 3.4);
-  const material = new THREE.MeshStandardMaterial({ color: 0xe8e8e8, transparent: true, opacity: 0.2 });
+  const material = new THREE.MeshStandardMaterial({ color: 0xe8e8e8, transparent: true, opacity: 0.34 });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.y = 1.1;
   mansionGroup.add(mesh);
+  fallbackMesh = mesh;
   fallbackMaterial = material;
   applySceneTheme(document.body.classList.contains("light-theme"));
 }
 
-const loader = new GLTFLoader();
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.7/");
-loader.setDRACOLoader(dracoLoader);
-loader.load(
-  "./assets/models/cooper-hewitt-exterior-low.glb",
-  (gltf) => {
-    prepareMansion(gltf.scene);
-  },
-  undefined,
-  (error) => {
-    console.error("Failed to load Carnegie Mansion model:", error);
-    createFallbackMassing();
-  }
-);
+createFallbackMassing();
 
-const projectField = new THREE.Group();
-scene.add(projectField);
+function loadMainModel() {
+  const loader = new GLTFLoader();
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.7/");
+  loader.setDRACOLoader(dracoLoader);
 
-const orbitElements = [];
+  loader.load(
+    "./assets/models/cooper-hewitt-exterior-low.glb",
+    (gltf) => {
+      prepareMansion(gltf.scene);
+      dracoLoader.dispose();
+    },
+    undefined,
+    (error) => {
+      console.error("Failed to load Carnegie Mansion model:", error);
+      dracoLoader.dispose();
+    }
+  );
+}
+
+loadMainModel();
 
 function setMaterialColorSafe(material, hex) {
   if (material && material.color && typeof material.color.setHex === "function") {
@@ -250,6 +302,10 @@ const observer = new IntersectionObserver(
 panels.forEach((panel) => observer.observe(panel));
 
 const themeToggleButton = document.getElementById("theme-toggle");
+const menuToggleButton = document.getElementById("menu-toggle");
+const header = document.querySelector(".site-header");
+const nav = document.getElementById("site-nav");
+const sectionLinks = [...document.querySelectorAll('a[href^="#"]')];
 const THEME_STORAGE_KEY = "architect-theme";
 
 function safeGetStoredTheme() {
@@ -274,12 +330,50 @@ function applyTheme(theme) {
   applySceneTheme(isLight);
 
   if (themeToggleButton) {
-    themeToggleButton.textContent = isLight ? "Dark Mode" : "Light Luxe";
+    themeToggleButton.setAttribute("aria-label", isLight ? "Switch to dark mode" : "Switch to light mode");
   }
 }
 
-const savedTheme = safeGetStoredTheme() || "dark";
-applyTheme(savedTheme);
+applyTheme("light");
+safeSetStoredTheme("light");
+
+function getHeaderOffset() {
+  return header ? header.getBoundingClientRect().height + 16 : 0;
+}
+
+function closeNavigationMenu() {
+  if (!menuToggleButton) {
+    return;
+  }
+
+  document.body.classList.remove("nav-open");
+  menuToggleButton.setAttribute("aria-expanded", "false");
+  menuToggleButton.setAttribute("aria-label", "Open menu");
+}
+
+function openNavigationMenu() {
+  if (!menuToggleButton) {
+    return;
+  }
+
+  document.body.classList.add("nav-open");
+  menuToggleButton.setAttribute("aria-expanded", "true");
+  menuToggleButton.setAttribute("aria-label", "Close menu");
+}
+
+function scrollToHash(hash) {
+  if (!hash || hash === "#") {
+    return;
+  }
+
+  const target = document.querySelector(hash);
+  if (!target) {
+    return;
+  }
+
+  const top = window.scrollY + target.getBoundingClientRect().top - getHeaderOffset();
+  window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+}
 
 if (themeToggleButton) {
   themeToggleButton.addEventListener("click", () => {
@@ -288,6 +382,39 @@ if (themeToggleButton) {
     applyTheme(nextTheme);
   });
 }
+
+if (menuToggleButton) {
+  menuToggleButton.addEventListener("click", () => {
+    const isOpen = document.body.classList.contains("nav-open");
+    if (isOpen) {
+      closeNavigationMenu();
+    } else {
+      openNavigationMenu();
+    }
+  });
+}
+
+sectionLinks.forEach((link) => {
+  link.addEventListener("click", (event) => {
+    const hash = link.getAttribute("href");
+    if (!hash || hash === "#") {
+      return;
+    }
+
+    const target = document.querySelector(hash);
+    if (!target) {
+      return;
+    }
+
+    event.preventDefault();
+    scrollToHash(hash);
+    closeNavigationMenu();
+
+    if (window.location.hash !== hash) {
+      history.pushState(null, "", hash);
+    }
+  });
+});
 
 const modelModal = document.getElementById("model-modal");
 const modalFrame = document.getElementById("model-modal-frame");
@@ -330,23 +457,67 @@ closeModalTargets.forEach((el) => {
 
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    closeNavigationMenu();
     closeModelModal();
   }
 });
 
+document.addEventListener("click", (event) => {
+  if (!document.body.classList.contains("nav-open")) {
+    return;
+  }
+
+  if (header?.contains(event.target) || nav?.contains(event.target)) {
+    return;
+  }
+
+  closeNavigationMenu();
+});
+
 let scrollProgress = 0;
-function updateScrollProgress() {
-  const maxScroll = document.body.scrollHeight - window.innerHeight;
-  scrollProgress = maxScroll <= 0 ? 0 : window.scrollY / maxScroll;
+let scrollTicking = false;
+let lastRenderTime = 0;
+
+function getViewportHeight() {
+  return window.visualViewport?.height || window.innerHeight;
 }
-window.addEventListener("scroll", updateScrollProgress, { passive: true });
+
+function updateScrollProgress() {
+  const root = document.documentElement;
+  const pageHeight = Math.max(root.scrollHeight, document.body.scrollHeight);
+  const maxScroll = pageHeight - getViewportHeight();
+  scrollProgress = maxScroll <= 0 ? 0 : window.scrollY / maxScroll;
+  scrollTicking = false;
+}
+
+function queueScrollProgressUpdate() {
+  if (scrollTicking) {
+    return;
+  }
+
+  scrollTicking = true;
+  window.requestAnimationFrame(updateScrollProgress);
+}
+
+window.addEventListener("scroll", queueScrollProgressUpdate, { passive: true });
 updateScrollProgress();
 
 function animate() {
   requestAnimationFrame(animate);
 
   try {
+    if (!renderer) {
+      return;
+    }
+
     const t = performance.now() * 0.001;
+    const now = performance.now();
+    const targetFrameInterval = compactViewportQuery.matches ? 1000 / 36 : 1000 / 60;
+    if (now - lastRenderTime < targetFrameInterval) {
+      return;
+    }
+    lastRenderTime = now;
+    const motionFactor = reducedMotionQuery.matches ? 0.3 : 1;
 
     const mansionBuild = smoothstep(0.0, 0.8, scrollProgress);
 
@@ -367,7 +538,7 @@ function animate() {
     // Finish on a clear front-facing angle at the end of the scroll journey.
     const journey = smoothstep(0.0, 1, scrollProgress);
     const turnToFront = THREE.MathUtils.lerp(-Math.PI * 1.05, 0, journey);
-    mansionGroup.rotation.y = turnToFront + Math.sin(t * 0.2) * 0.03 * (1 - journey);
+    mansionGroup.rotation.y = turnToFront + Math.sin(t * 0.2) * 0.018 * motionFactor * (1 - journey);
 
     projectField.rotation.y += 0.0014 + scrollProgress * 0.0026;
     projectField.rotation.x = Math.sin(t * 0.2) * 0.12;
@@ -393,7 +564,7 @@ function animate() {
       item.object.rotation.y -= item.spinY + n * 0.00035;
     });
 
-    camera.position.x = Math.sin(t * 0.14) * 0.24;
+    camera.position.x = Math.sin(t * 0.14) * 0.14 * motionFactor;
     camera.position.y = THREE.MathUtils.lerp(11.5, 2.3, journey);
     camera.position.z = THREE.MathUtils.lerp(5.6, 8.1, journey);
     camera.lookAt(0, THREE.MathUtils.lerp(0.75, 1.9, journey), 0);
@@ -406,7 +577,19 @@ function animate() {
 animate();
 
 window.addEventListener("resize", () => {
+  if (!renderer) {
+    queueScrollProgressUpdate();
+    return;
+  }
+
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth <= 980 ? 1 : 1.35));
+  if (window.innerWidth > 980) {
+    closeNavigationMenu();
+  }
+  queueScrollProgressUpdate();
 });
+
+window.visualViewport?.addEventListener("resize", queueScrollProgressUpdate, { passive: true });
